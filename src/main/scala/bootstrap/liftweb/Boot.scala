@@ -32,7 +32,7 @@ class Boot {
       Menu.i("add language") / "add_language",
       Menu.i("register") / "register_user",
       Menu.i("add_learning") / "add_learning" >> If(() => S.loggedIn_?, "You must be logged in"),
-     Menu.i("quizz bis") / "quizz_bis" 
+     Menu.i("quizz") / "quizz" >> If(() => S.loggedIn_?, "you must be logged in")
     )
 
     // set the sitemap.  Note if you don't want access control for

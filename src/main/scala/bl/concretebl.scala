@@ -222,14 +222,14 @@ object ConcreteBL extends BL with SessionVarStorage {
   }
 
   
-  private def isGoodWord(nb: Int, word: String): (Boolean, List[String]) = { 
+  private def isGoodWord(nb: Int, word: String): (Option[String], List[String]) = { 
     val l = allLearningWords(selectedLearningWords(nb))
     val w = word.trim.toLowerCase
     
     if (l.contains(w))
-      (true -> (List("good") ++ l))
+      (Some(w) -> (List("good") ++ l))
     else
-      (false -> (List("fail") ++ l))
+      (None -> (List("fail") ++ l))
   }
 
 

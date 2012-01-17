@@ -17,6 +17,9 @@ class AddTranslation {
   val targetWord = new Word("")
 
   val translations = ConcreteBL.allEnableTranslations.map(t => t._1 + "-" + t._2)
+
+  println(translations)
+
   val translation = new EnabledTranslation(translations.head)
 
   def process() { 

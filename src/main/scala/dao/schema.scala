@@ -17,6 +17,8 @@ object DB extends Schema {
   val translationTables = table[TranslationTable]("translation_tables")
   val users = table[User]("users")
   val learningWords = table[LearningWord]("learning_words")
+  val translationScores = table[TranslationScore]("translation_scores")
+
 
   on(languages)(l => declare(
     l.name is(unique),
@@ -38,6 +40,13 @@ object DB extends Schema {
     l.average defaultsTo(0.0F),
     l.success defaultsTo(0),
     l.fails defaultsTo(0)
+  ))
+
+  on(translationScores)(ts => declare(
+    ts.id is(autoIncremented, primaryKey),
+    ts.learningWordId is(indexed),
+    columns(ts.learningWordId, ts.translationId) are(indexed),
+    ts.success defaultsTo(0)
   ))
 
   /** Modify the schema only
@@ -133,8 +142,10 @@ object Main {
 
   def main(args: Array[String]) {
     startDbSession()
+
+
     
-//     transaction  {  DB.create }
+     transaction  {  DB.create }
 //    DB.addNewLanguage("finish", "fi")
 //    DB.addNewLanguage("french", "fr")
 //    DB.addNewLanguage("english", "en")

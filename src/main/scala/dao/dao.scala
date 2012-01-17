@@ -57,7 +57,7 @@ abstract class DAO {
 
   def numberLearningWords(userId: Long, trans: (String, String)): Long;
 
-  def updateLearningWord(userId: Long, b: Boolean, w: String, sourceLanguage: String, targetLanguage: String): Boolean;
+  def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean;
 
   def existTranslation(sourceWordName: String, sourceLanguage: String, targetWordName: String, targetLanguage: String): Boolean;
 }

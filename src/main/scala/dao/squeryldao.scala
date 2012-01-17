@@ -122,11 +122,16 @@ class SquerylDAO extends DAO {
 	false
       else { 
 	transaction { 
-	  DB.learningWords.insert(
-	    new LearningWord(userId, 
+	  val lw = new LearningWord(userId, 
 			     wordId, 
 			     sourceLanguageId, 
-			     targetLanguageId, 0, 0, 0.0F)) 
+			     targetLanguageId, 0, 0, 0.0F)
+	  DB.learningWords.insert(lw)
+
+	  val l = getWordTranslations(wordId, sourceLanguage, targetLanguage)
+	  l.foreach(e => DB.translationScores.insert(new TranslationScore(
+	    lw.id, e.id, 0
+	  )))
 	}
 	true
       }
@@ -135,6 +140,14 @@ class SquerylDAO extends DAO {
       false
   }
 
+  private def getWordTranslations(wordId: Long, sourceLanguage: String, targetLanguage: String): List[Translation] =
+    DB.translations.get(sourceLanguage) match { 
+      case None => from(DB.translations(targetLanguage)(sourceLanguage))(
+	tr => where(tr.targetWordId === wordId) select(tr)).toList
+      case Some(res) => from(res(targetLanguage))(
+	tr => where(tr.sourceWordId === wordId) select(tr)).toList
+    }
+    
 
   def allUserLearningWord(userId: Long) = transaction { 
     from(DB.learningWords)(lw => where(lw.userId === userId) select(lw))
@@ -328,7 +341,8 @@ class SquerylDAO extends DAO {
     }
   }
 
-  private lazy val enabledTranslation = { 
+//  private lazy val enabledTranslation = { 
+  private def enabledTranslation = {
     val l = ListBuffer[(String, String)]()
     DB.translations.keys.foreach(
       k => 
@@ -366,14 +380,44 @@ class SquerylDAO extends DAO {
 	      (lw.targetLanguageId === trgLangId)) compute(count(lw.id))).head.measures
   }
 
-  def updateLearningWord(userId: Long, b: Boolean, w: String, sourceLanguage: String, targetLanguage: String): Boolean = transaction { 
+
+  private def getWordName(transId: Long, sourceLanguage: String, targetLanguage: String) = 
+    DB.translations.get(sourceLanguage) match { 
+      case None => { 
+	val trans = from(DB.translations(targetLanguage)(sourceLanguage))(
+	  tr => where(tr.id === transId) select(tr)).head
+	from(DB.words(sourceLanguage))(
+	  w => where(w.id === trans.targetWordId) select(w.name)).head
+      }
+      case Some(res) => { 
+	val trans = from(res(targetLanguage))(
+	  tr => where(tr.id === transId) select(tr)).head
+	from(DB.words(sourceLanguage))(
+	  w => where(w.id === trans.sourceWordId) select(w.name)).head
+      }
+    }
+
+
+  private def allTranslationScores(learningWordId: Long) = 
+    from(DB.translationScores)(ts => where(ts.learningWordId === learningWordId) select(ts)).toList
+
+  def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean = transaction { 
         getLearning(userId, w, sourceLanguage, targetLanguage) match { 
       case None => false
       case Some(lw) => { 
-	if (b)
-	  lw.success += 1
-	else
-          lw.fails += 1
+	answer match { 
+	  case None => lw.fails += 1
+	  case Some(res) => { 
+	    lw.success += 1
+	    val tr = allTranslationScores(lw.id).find(e => 
+	      getWordName(e.translationId, sourceLanguage, targetLanguage) == res)
+	    if (!tr.isEmpty) { 
+	      val ttr = tr.get
+	      ttr.success += 1
+	      DB.translationScores.insert(ttr)
+	    }
+	  }
+	}
 	lw.average = lw.success / (lw.success + lw.fails)
 	DB.learningWords.insert(lw)
 	true
@@ -382,3 +426,4 @@ class SquerylDAO extends DAO {
   }
 
 }
+

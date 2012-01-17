@@ -30,9 +30,6 @@ class Caca {
   def ajax(s: String): JsCmd = { 
     val ac: NodeSeq = AutoComplete("", acRefresh, useless)
     SetHtml("list", ac)
-/*    println("autoComplete")
-    println(ac)
-    AppendHtml("list", <p>toto</p>)*/
   }
 
   def render = { 

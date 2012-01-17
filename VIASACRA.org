@@ -24,6 +24,10 @@
 ** on doit pouvoir distinquer quelle est la traduction qui a ete utilise
 * TODO permettre a ajouter traduction de pouvoir prendre plusieurs trad en use page
 * TODO changer la selection des langues par 2 select plutot que des radio boutton
+* TODO supprimer les mots de passe en dur
+* TODO ajouter des nombre au translation, word pour savoir si une des ligne de la table est utilisé ou non
+* TODO faire une table archive (pour eviter de supprimer definitivement) qui stock une version simplifier des learningword
+* TODO fair un rendu pour avoir la liste des mots que l'on apprend par langue
 * SQL
   - SELECT * 
 FROM english_french_trans eft, french_words fw, english_words ew 

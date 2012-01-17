@@ -36,6 +36,12 @@ class LearningWord(val userId: Long,
   def this() = this(0, 0, 0, 0, 0, 0, 0.0F)
 }
 
+class TranslationScore(val learningWordId: Long,
+		       val translationId: Long,
+		       var success: Int) extends KeyedEntity[Long] {
+  val id: Long = 0
+  def this() = this(0, 0, 0)
+}
 
   
 class User(var name: String,
