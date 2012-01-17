@@ -1,0 +1,32 @@
+* DONE fair les testes de base de donnée pour le support de l'utf-8
+** jdbc:mysql://hostname:port/database?useUnicode=true&characterEncoding=utf8
+   http://confluence.atlassian.com/display/DOC/Configuring+Database+Character+Encoding
+* DONE fair une interface dao
+** c'est brouillion mais présent
+* DONE s'assurer que toutes les chaine de carracter sont trimmé et lowercased
+** déporter dans les class typesafe
+* DONE trancher entre l'utilisation d'une table unique pour les mots,
+  d'une multitude de table pour les mots
+** choix d'une multitude de tables
+* TODO verifier dans UserName que le case ne se perd pas
+** mais qu'ai-je voulu dire
+* TODO dans le typesafe language il y a un couplage avec la bl
+** typesafe doit etre dans le package bl, car il est normal que les regles soit du niveau de la bl
+* DONE pour l'insersion de mot traduction:
+** DONE avoir le mot source unique et le mot destination non unique (textarea)
+** DONE ajouter une traduction automatiquement même si les mots n'existe pas
+* TODO lors de l'insertion dans mot pour add learning verifier que celui ci a au moins 1 traduction
+* il faut modifier les fonction de dao pour quelles retourne une indication sur les erreur
+  ou sinon quelles renvoi des exception
+** a voir
+* l'ajout de la langue par un utilisateur est, bof, ca rement en question le raw code sql pour la creation de nouvelles tables
+* TODO faire une distinction plus fine sur la reponse au quizz
+** on doit pouvoir distinquer quelle est la traduction qui a ete utilise
+* TODO permettre a ajouter traduction de pouvoir prendre plusieurs trad en use page
+* TODO changer la selection des langues par 2 select plutot que des radio boutton
+* SQL
+  - SELECT * 
+FROM english_french_trans eft, french_words fw, english_words ew 
+WHERE eft.sourceWordId = ew.id
+AND eft.targetWordId = fw.id
+;

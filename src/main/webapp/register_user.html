@@ -1,0 +1,29 @@
+<div id="main" class="lift:surround?with=default&at=content">
+
+  <form class="lift:RegisterUser?form=post">
+    <div class="lift:Msg?id=global-err&errorClass=form-error">error</div>
+
+    <div>
+      <label>user name</label> 
+      <input name="user-name" type="text"></input>
+      <span class="lift:Msg?id=user-name-err&errorClass=form-error">error username</span>
+    </div>
+    
+    <div> 
+      <label>password</label> 
+      <input name="password" type="password"></input> 
+      <span class="lift:Msg?id=password-err&errorClass=form-error">error password</span>
+    </div>
+    
+    <div> 
+      <label>email</label>
+      <input name="email" type="text"></input>
+      <span class="lift:Msg?id=email-err&errorClass=form-error">error email</span>
+    </div>
+    
+    <div> 
+      <input type="submit" value="ok"></input>
+    </div>
+  </form>
+
+</div>
