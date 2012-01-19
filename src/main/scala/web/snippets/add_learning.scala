@@ -45,8 +45,6 @@ class AddLearning {
   }
 
   def add(): JsCmd = { 
-    println("add")
-    println()
     wordCount += 1
     AppendHtml("add-list", <div id={"learn-" + wordCount}></div>
 	     ) & SetHtml("learn-" + wordCount, AutoComplete("", refreshWord, stackIn))

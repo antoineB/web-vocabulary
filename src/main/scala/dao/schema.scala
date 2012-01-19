@@ -81,13 +81,13 @@ object DB extends Schema {
   private def createWordTable(name: String) { inTransaction { 
     val s = Session.currentSession.connection.createStatement()
     s.executeUpdate(
-      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(128) UNIQUE NOT NULL);")
+      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(128) UNIQUE NOT NULL, nbRelations INT);")
       } }
 
   private  def createTranslationTable(name: String) { inTransaction { 
     val s = Session.currentSession.connection.createStatement()
     s.executeUpdate(
-      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, sourceWordId BIGINT NOT NULL, targetWordId BIGINT NOT NULL);")
+      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, sourceWordId BIGINT NOT NULL, targetWordId BIGINT NOT NULL, nbRelations INT);")
     s.executeUpdate("CREATE INDEX " + name + "_si on " + name + "(sourceWordId);")
     s.executeUpdate("CREATE INDEX " + name + "_ti on " + name + "(targetWordId);")
   
@@ -110,7 +110,7 @@ object DB extends Schema {
       }
     }
   } 
-	    println(words); println(translations) }
+	  }
 
   private def allWordTableName = from(languages)(l => select(l.name)).toList
   private def allTranslationTableName = from(translationTables)(tt => select(tt.name)).toList

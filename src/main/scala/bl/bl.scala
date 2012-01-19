@@ -28,7 +28,7 @@ abstract class BL {
 
   def allWordsStartWith(lang: Language, w: Word): List[String];
 
-  def addTranslation(sourceWord: Word, targetWord: Word, translation: EnabledTranslation): HashMap[String, String];
+  def addTranslation(sourceWord: Word, targetWord: ListWord, translation: EnabledTranslation): HashMap[String, String];
 
 /*  def addLearningWord(userId: Long, words: Stack[Word], translation: EnabledTranslation): Option[String];
 */

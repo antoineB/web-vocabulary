@@ -90,8 +90,11 @@ class Quizz {
 
   def process(): JsCmd = {
     val m = ConcreteBL.testQuizz(UserSession.is.get, mapB.result, new EnabledTranslation(currentTrans))
-    m.foreach(e => S.error("elem-" + e._1 + "-err", 
-			   e._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{n}</span>)))
+/*    m.foreach(e => S.error("elem-" + e._1 + "-err", 
+			   e._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{n}</span>)))*/
+    
+    m.foldLeft(Noop)((js, jsU) => js & SetHtml("elem-" + jsU._1 + "-err", 
+			   jsU._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{n}</span>)))
   }
 
   def render = { 
@@ -102,15 +105,11 @@ class Quizz {
 
     val tr = translations.map(e => (e._1 + "-" + e._2) -> (e._1 + "-" + e._2))
 
-    println(tr)
-
     currentTrans = tr.head._1
     currentElems = numbers.head._1.toInt
 
 
     val list = ConcreteBL.getLearning(UserSession.is.get, currentElems, new EnabledTranslation(currentTrans))
-
-    println("zozo")
 
     if (currentElems > list.size)
       currentElems = list.size

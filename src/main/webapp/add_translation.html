@@ -3,10 +3,17 @@
   <form class="lift:AddTranslation?form=post">
     <div class="lift:Msg?id=global-err&errorClass=form-error">error</div>
 
-    <div>
+<!--    <div>
       <input name="language" type="radio"></input>
       <span class="lift:Msg?id=language-err&errorClass=form-error">error language</span>
+    </div> -->
+
+    <div>
+      <select id="source-language"></select>
+      <select id="target-language"></select>
+      <span class="lift:Msg?id=language-err&errorClass=form-error">error word</span>
     </div>
+
 
     <div>
       <label>from</label> 

@@ -11,30 +11,34 @@ import scala.xml.NodeSeq
 
 import lib.typesafe._
 import bl.ConcreteBL
+import web.lib.LanguageSelect
 
-class AddTranslation {
+class AddTranslation extends LanguageSelect {
   val sourceWord = new Word("")
-  val targetWord = new Word("")
+  val targetWord = new ListWord("")
 
-  val translations = ConcreteBL.allEnableTranslations.map(t => t._1 + "-" + t._2)
+  override def select2Id = "target-language"
+  override def languages = ConcreteBL.allLanguagesList
 
-  println(translations)
-
-  val translation = new EnabledTranslation(translations.head)
+  //  val translations = ConcreteBL.allEnableTranslations.map(t => t._1 + "-" + t._2)
+  //  val translation = new EnabledTranslation(translations.head)
 
   def process() { 
     val errors = ConcreteBL.addTranslation(sourceWord, targetWord, translation)
 
     if (errors.isEmpty)
-      S.redirectTo("/")
-    else
+      S.redirectTo(S.uri + "?lang1=" + lang1Res + "&lang2=" + lang2Res)
+    else //TODO rediriger aussi en erreur idem au dessus
       errors.keys.foreach(k => S.error(k + "-err", errors(k)))
   }
 
   def render = {
+    
+    "#source-language" #> select1NodeSeq &
+    "#target-language" #> select2NodeSeq &
     "name=word-from" #> SHtml.onSubmit(sourceWord.value = _) &
     "name=word-to" #> SHtml.onSubmit(targetWord.value = _) &
-    "name=language" #> SHtml.radio(translations, Full(translations.head), translation.value = _).toForm &
+//    "name=language" #> SHtml.radio(translations, Full(translations.head), translation.value = _).toForm &
     "type=submit" #> SHtml.onSubmitUnit(process)
   }
 }

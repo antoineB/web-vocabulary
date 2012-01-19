@@ -2,8 +2,40 @@
     color: red;
 }
 
-.topbar {
-    border-style: solid;
-    border-color: blue;
-    border-radius: 12px;
+/* MENU BAR */
+
+.topbar .nav {
+    list-style-type: none;
+    background: -moz-linear-gradient(top, #ffff30 0%, #e7fc62 18%, #b8e2f6 19%, #b6dffd 100%);
+    padding: 5px;
+    border-radius: 7px;
+    z-index: 100;
+}
+
+.topbar li {
+    display: inline;
+    margin-right: 5px;
+}
+
+.topbar .active {
+    Background: -moz-linear-gradient(top, #e0f3fa 0%, #d4f7f7 18%, #baf4f4 19%, #e4ff38 100%);
+    z-index: 90;
+    paddin-top: 5px;
+    padding-bottom: 5px;
+}
+
+.topbar a {
+    text-decoration: none;
+    font-size: large;
+}
+
+/* LOGIN */
+#login div {
+    display: inline;
+}
+
+/* ADD TRANSLATION */
+textarea {
+    width: 250px;
+    height: 500px;
 }

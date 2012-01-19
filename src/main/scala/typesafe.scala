@@ -67,6 +67,32 @@ object Word {
 }
 
 
+class ListWord(valueIn: String) { 
+   protected var _value: Array[String] = beforeCheck(valueIn)
+
+  def regex = """.{1,50}""".r
+
+  def beforeCheck(s: String) = s.split("\r\n").filter(_ != "").map(_.trim.toLowerCase)
+
+  def afterCheck(a: Array[String]) = a.toList
+
+  def get: Option[List[String]] = {
+    if (_value.find(regex.findAllIn(_).isEmpty).isDefined)
+      None
+    else 
+      Some(afterCheck(_value))
+  }
+
+  def value_=(s: String): Unit = { _value = beforeCheck(s) }
+  def value = get
+
+}
+
+object ListWord { 
+  val errMsg = "The word isn't conform to the rule."
+  val rule = "A word can be composed with all character you want and have a lenght of 50 maximum."
+}
+
 class Language(valueIn: String) { 
   protected var _value: String = beforeCheck(valueIn)
 

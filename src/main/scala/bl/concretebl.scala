@@ -44,6 +44,7 @@ object ConcreteBL extends BL with SessionVarStorage {
   def allLanguages: List[(String, String)] =  
     dao.allLanguages.map(l => (l.name, l.name.capitalize))
   
+  def allLanguagesList: List[String] = dao.allLanguages.map(e => e.name)
 
   def existLanguage(s: String): Boolean = dao.existLanguage(s)
 
@@ -111,7 +112,7 @@ object ConcreteBL extends BL with SessionVarStorage {
   }
 
 
-  def addTranslation(sourceWord: Word, targetWord: Word, translation: EnabledTranslation): HashMap[String, String] = { 
+  def addTranslation(sourceWord: Word, targetWord: ListWord, translation: EnabledTranslation): HashMap[String, String] = { 
     val m = HashMap.newBuilder[String, String]
 
     val checkedSource = sourceWord.get match { 
@@ -119,8 +120,8 @@ object ConcreteBL extends BL with SessionVarStorage {
       case Some(s) => s
     }
     val checkedTarget = targetWord.get match { 
-      case None => m += (("word-to", Word.errMsg)) ; null
-      case Some(s) => s.split("\n")
+      case None => m += (("word-to", ListWord.errMsg)) ; null
+      case Some(s) => s
     }
     val checkedTranslation = translation.get match { 
       case None => m += (("language", EnabledTranslation.errMsg)); null
@@ -248,11 +249,16 @@ object ConcreteBL extends BL with SessionVarStorage {
 
 	  dao.updateLearningWord(userId, r._1, w, trans.get.get._1, trans.get.get._2)
 
-	  mapB += (k -> r._2)
+	  mapB += (k -> r._2.toSet.toList)
 	}
       }
     }
-       
+
+    if (map.isEmpty)
+      println("map is empty")
+    else
+      println("map isn't empty")
+
     mapB.result
   }
 }
