@@ -28,6 +28,7 @@
 * TODO ajouter des nombre au translation, word pour savoir si une des ligne de la table est utilisé ou non
 * TODO faire une table archive (pour eviter de supprimer definitivement) qui stock une version simplifier des learningword
 * TODO fair un rendu pour avoir la liste des mots que l'on apprend par langue
+* TODO semblerai qu'il y est un probleme apres avoir ajouter une langue puis y ajouter une traduction
 * SQL
   - SELECT * 
 FROM english_french_trans eft, french_words fw, english_words ew 

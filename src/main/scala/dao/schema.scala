@@ -81,13 +81,13 @@ object DB extends Schema {
   private def createWordTable(name: String) { inTransaction { 
     val s = Session.currentSession.connection.createStatement()
     s.executeUpdate(
-      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(128) UNIQUE NOT NULL, nbRelations INT);")
+      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(128) UNIQUE NOT NULL, nbRelations INT DEFAULT 0, weakNess INT DEFAULT 0);")
       } }
 
   private  def createTranslationTable(name: String) { inTransaction { 
     val s = Session.currentSession.connection.createStatement()
     s.executeUpdate(
-      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, sourceWordId BIGINT NOT NULL, targetWordId BIGINT NOT NULL, nbRelations INT);")
+      "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, sourceWordId BIGINT NOT NULL, targetWordId BIGINT NOT NULL, nbRelations INT DEFAULT 0, weakNess INT DEFAULT 0);")
     s.executeUpdate("CREATE INDEX " + name + "_si on " + name + "(sourceWordId);")
     s.executeUpdate("CREATE INDEX " + name + "_ti on " + name + "(targetWordId);")
   
@@ -143,12 +143,13 @@ object Main {
   def main(args: Array[String]) {
     startDbSession()
 
-
     
-     transaction  {  DB.create }
-//    DB.addNewLanguage("finish", "fi")
-//    DB.addNewLanguage("french", "fr")
-//    DB.addNewLanguage("english", "en")
+    transaction  {  DB.create }
+    DB.addNewLanguage("finish", "fi")
+    DB.addNewLanguage("french", "fr")
+    DB.addNewLanguage("english", "en")
+
+
 /*    DB.init
 
     dd.addUser("toto", "bernard", "jean")

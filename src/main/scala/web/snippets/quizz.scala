@@ -53,6 +53,7 @@ class Quizz {
   var mapB = SortedMap.newBuilder[String, Word]
 
   def addNewValue(name: String)(value: String) { 
+    println("add new value")
     mapB += (name -> new Word(value))
   }
 
@@ -119,7 +120,8 @@ class Quizz {
        yield Quizz.createElem(list(i), i, addNewValue(i.toString))
      }.foldLeft(NodeSeq.Empty)((nss, ns) => nss ++ ns) &
     "name=language" #> SHtml.ajaxSelect(tr, Full(tr.head._2), languageSelect) &
-    "name=number" #> (SHtml.ajaxSelect(numbers, Full(numbers.head._2), numberSelect) ++
-    SHtml.hidden(process))
+    "name=number" #> SHtml.ajaxSelect(numbers, Full(numbers.head._2), numberSelect) &
+    "type=submit" #> SHtml.ajaxSubmit("ok", process)
+//    SHtml.hidden(process))
   }
 }

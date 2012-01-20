@@ -72,3 +72,4 @@ class AddLearning {
     "type=submit" #> SHtml.onSubmitUnit(process)
   }
 }
+

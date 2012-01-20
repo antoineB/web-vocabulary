@@ -18,12 +18,7 @@ abstract class LanguageSelect {
   def select2Id: String;
 
   val languages1 = languages.map(s => s -> s.capitalize)
-  var languages2 = languages1.tail
-
-
-/*  val lang1Res = new Language(languages1.head._1)
-  val lang2Res = new Language(languages2.head._1)*/
-
+  var languages2 = {if (S.param("lang1").isEmpty) languages1.tail else languages1.filter(e => e._1 != S.param("lang1").get)}
 
 
   var lang1Res = {if (S.param("lang1").isEmpty) languages1.head._1 else S.param("lang1").get}
@@ -33,6 +28,7 @@ abstract class LanguageSelect {
   def ajaxSelectFunc(s: String): JsCmd = { 
     languages2 = languages1.filter(e => e._1 != s)
     lang1Res = s
+    lang2Res = languages2.head._1
     translation.value = lang1Res + "-" + lang2Res
     SetHtml(select2Id, select2NodeSeq)
   }

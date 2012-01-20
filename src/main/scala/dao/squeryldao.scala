@@ -144,7 +144,7 @@ class SquerylDAO extends DAO {
 	      DB.translationScores.insert(
 		new TranslationScore(lw.id, e.id, 0))
 	      e.nbRelations += 1
-	      trTable.insert(e)
+	      trTable.update(e)
 	  } )
 	}
 	true
