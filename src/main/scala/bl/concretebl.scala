@@ -223,33 +223,33 @@ object ConcreteBL extends BL with SessionVarStorage {
   }
 
   
-  private def isGoodWord(nb: Int, word: String): (Option[String], List[String]) = { 
+  private def isGoodWord(nb: Int, word: String): (Boolean, List[String]) = { 
     val l = allLearningWords(selectedLearningWords(nb))
     val w = word.trim.toLowerCase
     
     if (l.contains(w))
-      (Some(w) -> (List("good") ++ l))
+      (true -> l)
     else
-      (None -> (List("fail") ++ l))
+      (false -> l)
   }
 
 
   /**
    * @param map is a map containing a number as key and a word entered
    */
-  def testQuizz(userId: Long, map: SortedMap[String, Word], trans: EnabledTranslation): HashMap[String, List[String]] = { 
-    val mapB = HashMap.newBuilder[String, List[String]]
+  def testQuizz(userId: Long, map: SortedMap[String, Word], trans: EnabledTranslation): HashMap[String, (Boolean, List[String])] = { 
+    val mapB = HashMap.newBuilder[String, (Boolean, List[String])]
 
     for ((k, v) <- map) { 
       v.get match {
-	case None => mapB += (k -> List("the word is a word conform"))
+	case None => mapB += (k -> (false -> List("the word is a word conform")))
 	case Some(res) => { 
 	  val r = isGoodWord(k.toInt, res)
 	  val w = selectedLearningWords(k.toInt)
 
-	  dao.updateLearningWord(userId, r._1, w, trans.get.get._1, trans.get.get._2)
+	  dao.updateLearningWord(userId, {if (r._1) Some(res.trim.toLowerCase) else None}, w, trans.get.get._1, trans.get.get._2)
 
-	  mapB += (k -> r._2.toSet.toList)
+	  mapB += (k -> (r._1 -> r._2.toSet.toList))
 	}
       }
     }

@@ -39,3 +39,22 @@ textarea {
     width: 250px;
     height: 300px;
 }
+
+/* QUIZZ */
+.quizz-label {
+    min-width: 125px;
+    margin-left: 7px;
+    float: left;
+}
+
+.quizz-fail {
+    color: red;
+}
+
+.quizz-success {
+    color: green;
+}
+
+#list div {
+
+}

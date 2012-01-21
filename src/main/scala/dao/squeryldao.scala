@@ -437,7 +437,7 @@ class SquerylDAO extends DAO {
     from(DB.translationScores)(ts => where(ts.learningWordId === learningWordId) select(ts)).toList
 
   def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean = transaction { 
-        getLearning(userId, w, sourceLanguage, targetLanguage) match { 
+    getLearning(userId, w, sourceLanguage, targetLanguage) match { 
       case None => false
       case Some(lw) => { 
 	answer match { 

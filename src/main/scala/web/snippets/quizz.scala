@@ -22,7 +22,7 @@ object Quizz {
   def createElem(label: String, nb: Int, f: (String) => Unit) = { 
     val ns: NodeSeq = SHtml.text("", f, "id" -> {"elem-" + nb})
     val ns2: NodeSeq = Msg.renderIdMsgs("elem-" + nb + "-err")
-    <div>{<span id={"label-" + nb}>{label}</span> ++
+    <div>{<span id={"label-" + nb} class="quizz-label">{label}</span> ++
 	  ns ++ ns2
 	}</div>
   }
@@ -91,11 +91,13 @@ class Quizz {
 
   def process(): JsCmd = {
     val m = ConcreteBL.testQuizz(UserSession.is.get, mapB.result, new EnabledTranslation(currentTrans))
-/*    m.foreach(e => S.error("elem-" + e._1 + "-err", 
-			   e._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{n}</span>)))*/
-    
-    m.foldLeft(Noop)((js, jsU) => js & SetHtml("elem-" + jsU._1 + "-err", 
-			   jsU._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{n}</span>)))
+
+    m.foldLeft(Noop)(
+      (js, jsU) => 
+	js & SetHtml("elem-" + jsU._1 + "-err",
+		     <span class={if (jsU._2._1) "quizz-success" else "quizz-fail"}>{ 
+		       jsU._2._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{n}</span>)
+    }</span>))
   }
 
   def render = { 
@@ -122,6 +124,5 @@ class Quizz {
     "name=language" #> SHtml.ajaxSelect(tr, Full(tr.head._2), languageSelect) &
     "name=number" #> SHtml.ajaxSelect(numbers, Full(numbers.head._2), numberSelect) &
     "type=submit" #> SHtml.ajaxSubmit("ok", process)
-//    SHtml.hidden(process))
   }
 }
