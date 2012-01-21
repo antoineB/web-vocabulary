@@ -25,7 +25,7 @@
 * TODO permettre a ajouter traduction de pouvoir prendre plusieurs trad en use page
 * TODO changer la selection des langues par 2 select plutot que des radio boutton
 * TODO supprimer les mots de passe en dur
-* TODO ajouter des nombre au translation, word pour savoir si une des ligne de la table est utilisé ou non
+* DONE ajouter des nombre au translation, word pour savoir si une des ligne de la table est utilisé ou non
 * TODO faire une table archive (pour eviter de supprimer definitivement) qui stock une version simplifier des learningword
 * TODO fair un rendu pour avoir la liste des mots que l'on apprend par langue
 * TODO semblerai qu'il y est un probleme apres avoir ajouter une langue puis y ajouter une traduction
@@ -33,6 +33,7 @@
 * TODO il y a 2 retour des mots dans le quizz
 * TODO mettre des commentaires
 * TODO si il n'y a pas de BD add_translation plante, si pas de languages dans la BD add_learning plante
+* TODO la generation "aleatoire" du quizz est bancale
 * SQL
   - SELECT * 
 FROM english_french_trans eft, french_words fw, english_words ew 

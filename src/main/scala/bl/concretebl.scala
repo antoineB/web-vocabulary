@@ -261,6 +261,30 @@ object ConcreteBL extends BL with SessionVarStorage {
 
     mapB.result
   }
+
+  def wrongTranslation(sourceWord: Word, targetWord: Word, translation: EnabledTranslation): Boolean = { 
+    val checkedSource = sourceWord.get match { 
+      case None => null
+      case Some(s) => s
+    }
+
+    val checkedTarget = targetWord.get match { 
+      case None => null
+      case Some(s) => s
+    }
+
+    val checkedTranslation = translation.get match { 
+      case None => null
+      case Some(s) => s
+    }
+
+
+    if (checkedTranslation == null || checkedTarget == null || checkedSource == null)
+      false
+    else
+      dao.increaseFailTranslation(checkedSource, checkedTranslation._1, checkedTarget, checkedTranslation._2)
+  }
+
 }
 
 

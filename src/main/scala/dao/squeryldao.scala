@@ -460,5 +460,37 @@ class SquerylDAO extends DAO {
 	}
   }
 
+  def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean = transaction { 
+    try { 
+      val srcWordId = getWord(sourceWord, sourceLang).get.id
+      val trgWordId = getWord(targetWord, targetLang).get.id
+      
+      val trans = DB.translations.get(sourceLang) match { 
+	case None => 
+	  from(DB.translations(targetLang)(sourceLang))(
+	    tr => where(
+	      (tr.targetWordId === srcWordId) and 
+	      (tr.sourceWordId === trgWordId)) select(tr)).head
+	case Some(res) => 
+	  from(res(targetLang))(
+	    tr => where(
+	      (tr.sourceWordId === srcWordId) and 
+	      (tr.targetWordId === trgWordId)) select(tr)).head
+      }
+
+      trans.weakNess += 1
+      DB.translations.get(sourceLang) match { 
+	case None => DB.translations(targetLang)(sourceLang).update(trans)
+	case Some(table) => table(targetLang).update(trans)
+      }
+      true
+    }
+    catch { 
+      case _ => false
+    }
+  }
+
+
 }
+
 

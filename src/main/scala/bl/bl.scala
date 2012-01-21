@@ -38,6 +38,8 @@ abstract class BL {
 
   def quizzAnswer(userId: Long, trans: EnabledTranslation, w1: Word, w2: Word, w3: Word, w4: Word, quizz: List[(String, List[String])]): Either[HashMap[String, String], List[Boolean]];
   */
+
+  def wrongTranslation(sourceWord: Word, targetWord: Word, translation: EnabledTranslation): Boolean;
   
 }
 
