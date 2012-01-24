@@ -70,9 +70,9 @@ class Quizz {
     m.foldLeft(Noop)(
       (js, jsU) => 
 	js & SetHtml("elem-" + jsU._1 + "-err",
-		     <span class={if (jsU._2._1) "quizz-success" else "quizz-fail"}>{ 
-		       jsU._2._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ textAjax(jsU._1.toInt, n))
-		     }</span>))
+		     <span class={if (jsU._2._1._1) "quizz-success" else "quizz-fail"}>{ 
+		       jsU._2._1._2.foldLeft(NodeSeq.Empty)((ns, n) => ns ++ <span>{textAjax(jsU._1.toInt, n)}</span>)
+		     }</span><span>{jsU._2._2}</span>))
   }
 
   private val jsGetText = JsRaw("$(this).text()")

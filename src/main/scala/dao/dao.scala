@@ -62,4 +62,6 @@ abstract class DAO {
   def existTranslation(sourceWordName: String, sourceLanguage: String, targetWordName: String, targetLanguage: String): Boolean;
 
   def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean;
+
+  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float;
 }

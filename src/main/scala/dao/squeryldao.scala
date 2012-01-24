@@ -227,7 +227,7 @@ class SquerylDAO extends DAO {
       case None => false
       case Some(lw) => { 
         lw.fails += 1
-	lw.average = lw.success / (lw.success + lw.fails)
+	lw.average = lw.success.toFloat / (lw.success + lw.fails)
 	DB.learningWords.update(lw)
 	true
       }
@@ -239,7 +239,7 @@ class SquerylDAO extends DAO {
       case None => false
       case Some(lw) => {
 	lw.success += 1
-	lw.average = lw.success / (lw.success + lw.fails)
+	lw.average = lw.success.toFloat / (lw.success + lw.fails)
 	DB.learningWords.update(lw)
 	true
       }
@@ -453,12 +453,20 @@ class SquerylDAO extends DAO {
 	    }
 	  }
 	}
-	lw.average = lw.success / (lw.success + lw.fails)
+	lw.average = lw.success.toFloat / (lw.success + lw.fails)
 	DB.learningWords.update(lw)
 	true
       }
 	}
   }
+
+  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float = transaction { 
+    getLearning(userId, w, sourceLanguage, targetLanguage) match { 
+      case None => 0.0F
+      case Some(lw) => lw.average
+    }
+  }
+
 
   def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean = transaction { 
     try { 

@@ -8,13 +8,15 @@
 * DONE trancher entre l'utilisation d'une table unique pour les mots,
   d'une multitude de table pour les mots
 ** choix d'une multitude de tables
+* DONE il y a 2 retour des mots dans le quizz
+** probleme de duplicata dans la BD
+* DONE pour l'insersion de mot traduction:
+** DONE avoir le mot source unique et le mot destination non unique (textarea)
+** DONE ajouter une traduction automatiquement même si les mots n'existe pas
 * TODO verifier dans UserName que le case ne se perd pas
 ** mais qu'ai-je voulu dire
 * TODO dans le typesafe language il y a un couplage avec la bl
 ** typesafe doit etre dans le package bl, car il est normal que les regles soit du niveau de la bl
-* DONE pour l'insersion de mot traduction:
-** DONE avoir le mot source unique et le mot destination non unique (textarea)
-** DONE ajouter une traduction automatiquement même si les mots n'existe pas
 * TODO lors de l'insertion dans mot pour add learning verifier que celui ci a au moins 1 traduction
 * il faut modifier les fonction de dao pour quelles retourne une indication sur les erreur
   ou sinon quelles renvoi des exception
@@ -30,7 +32,6 @@
 * TODO fair un rendu pour avoir la liste des mots que l'on apprend par langue
 * TODO semblerai qu'il y est un probleme apres avoir ajouter une langue puis y ajouter une traduction
 * TODO continuer la modification dans le quizz
-* TODO il y a 2 retour des mots dans le quizz
 * TODO mettre des commentaires
 * TODO si il n'y a pas de BD add_translation plante, si pas de languages dans la BD add_learning plante
 * TODO la generation "aleatoire" du quizz est bancale
