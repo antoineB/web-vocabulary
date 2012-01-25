@@ -12,11 +12,11 @@ class SquerylDAO extends DAO {
   DB.init
   private val defaultWordLimit = 30
   private val defaultUserLearingWordLimit = 50
+  private val defaultWeaknessLimit = 10
 
-  //Language
+  //----LANGUAGE
+
   def allLanguages(): List[Language] = transaction { from(DB.languages)(l => select(l)).toList }
-
-
 
   def existLanguage(name: String): Boolean = transaction { from(DB.languages)(l => where(l.name === name) select(l)).isEmpty.unary_! }
 
@@ -24,7 +24,7 @@ class SquerylDAO extends DAO {
     from(DB.languages)(l => where(l.name === name) select(l)).headOption
   }
 
-  def addLanguage(name: String, iso: String = ""): Boolean = transaction { 
+  def addLanguage(name: String, iso: String = ""): Boolean = { 
     if ("""[a-z_]+""".r.findAllIn(name).isEmpty)
       false
     else if("""[a-z]{1,4}""".r.findAllIn(iso).isEmpty)
@@ -32,31 +32,31 @@ class SquerylDAO extends DAO {
     else if (existLanguage(name))
       false
     else { 
-      DB.addNewLanguage(name, iso) 
+      transaction { DB.addNewLanguage(name, iso) }
       true
     }
   }
 
-  type Error[T] = Either[HashMap[String, String], T]
 
-  //word
-  def allWords(langName: String, n: Option[Int] = None): List[Word] = transaction { 
-    n match {
-      case None => from(DB.words(langName))(w => select(w)).page(0, defaultWordLimit).toList
-      case Some(res) => from(DB.words(langName))(w => select(w)).page(0, res).toList
-    }
-  }
 
-  def allWordsStartWith(langName: String, start: String, n: Option[Int] = None): List[Word] = transaction { 
+  //----WORD
+  def allWords(langName: String, n: Option[Int] = None): List[Word] = 
     n match {
-      case None => from(DB.words(langName))(
-	w => 
-	  where(w.name like (start + "%")) select(w)).page(0, defaultWordLimit).toList
-      case Some(res) => from(DB.words(langName))(
-	w => 
-	  where(w.name like (start + "%")) select(w)).page(0, res).toList
+      case None => transaction { from(DB.words(langName))(w => select(w)).page(0, defaultWordLimit).toList }
+      case Some(res) => transaction { from(DB.words(langName))(w => select(w)).page(0, res).toList }
     }
-  }
+  
+
+  def allWordsStartWith(langName: String, start: String, n: Option[Int] = None): List[Word] =  
+    n match {
+      case None => transaction { from(DB.words(langName))(
+	w => 
+	  where(w.name like (start + "%")) select(w)).page(0, defaultWordLimit).toList }
+      case Some(res) => transaction { from(DB.words(langName))(
+	w => 
+	  where(w.name like (start + "%")) select(w)).page(0, res).toList }
+    }
+  
 
   def existWord(name: String, langName: String): Boolean = transaction { 
     from(DB.words(langName))(w => where(w.name like name) select(w)).isEmpty.unary_!
@@ -74,7 +74,7 @@ class SquerylDAO extends DAO {
 
 
 
-  //user
+  //----USER
   def existUser(name: String): Boolean = transaction { 
     from(DB.users)(u => where(u.name like name) select(u)).isEmpty.unary_!
   }
@@ -82,25 +82,19 @@ class SquerylDAO extends DAO {
   def addUser(name: String, password: String, email: String): Boolean = { 
     if (existUser(name))
       false
-    else transaction {
-      DB.users.insert(new User(name, password, email))
+    else  {
+      transaction { DB.users.insert(new User(name, password, email)) }
       true
     }
   }
 
-  def verifyUser(name: String, pass: String): Option[User] = 
-    transaction { 
-      val q: Query[User] = from(DB.users)(
-	u =>
-	  where((u.name like name) and (u.password like pass)) select(u))
-      
-      if (q.isEmpty)
-	None
-      else
-	Some(q.head)
-    }
+  def verifyUser(name: String, pass: String): Option[User] = transaction { 
+    from(DB.users)(u => where((u.name like name) and (u.password like pass)) select(u)).headOption
+  }
   
 
+  /** Eeturn the translation table for the given languages.
+   */ 
   private def getTrTable(sourceLang: String, targetLang: String) = 
     DB.translations.get(sourceLang) match { 
       case None => DB.translations(targetLang)(sourceLang)
@@ -108,7 +102,7 @@ class SquerylDAO extends DAO {
     }
 
 
-  //learning
+  //----LEARNING
   def addLearningWord(wordName: String, userId: Long, sourceLanguage: String, targetLanguage: String): Boolean = { 
     if (getLearning(userId, wordName, sourceLanguage, targetLanguage).isEmpty) { 
       var ok = true
@@ -129,15 +123,16 @@ class SquerylDAO extends DAO {
       if (!ok)
 	false
       else { 
-	transaction { 
-	  val lw = new LearningWord(userId, 
-			     wordId, 
-			     sourceLanguageId, 
-			     targetLanguageId, 0, 0, 0.0F)
-	  DB.learningWords.insert(lw)
-
 	  val trTable = getTrTable(sourceLanguage, targetLanguage)
 
+	  val lw = new LearningWord(userId, 
+				    wordId, 
+				    sourceLanguageId, 
+				    targetLanguageId, 0, 0, 0.0F)
+
+	transaction { 
+	  DB.learningWords.insert(lw)
+	  
 	  val l = getWordTranslations(wordId, sourceLanguage, targetLanguage)
 	  l.foreach(
 	    e => {  
@@ -156,17 +151,12 @@ class SquerylDAO extends DAO {
 
   private def getWordTranslations(wordId: Long, sourceLanguage: String, targetLanguage: String): List[Translation] =
     DB.translations.get(sourceLanguage) match { 
-      case None => from(DB.translations(targetLanguage)(sourceLanguage))(
-	tr => where(tr.targetWordId === wordId) select(tr)).toList
-      case Some(res) => from(res(targetLanguage))(
-	tr => where(tr.sourceWordId === wordId) select(tr)).toList
+      case None => inTransaction { from(DB.translations(targetLanguage)(sourceLanguage))(
+	tr => where(tr.targetWordId === wordId) select(tr)).toList }
+      case Some(res) => inTransaction { from(res(targetLanguage))(
+	tr => where(tr.sourceWordId === wordId) select(tr)).toList }
     }
     
-
-  def allUserLearningWord(userId: Long) = transaction { 
-    from(DB.learningWords)(lw => where(lw.userId === userId) select(lw))
-  }
-
   def learningWord(userId: Long, limit: Int, sourceLanguage: String, targetLanguage: String): Iterable[(Word, List[Word])] = { 
     var ok = true
    
@@ -195,7 +185,7 @@ class SquerylDAO extends DAO {
     }
   }
 
-  private def getLearning(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Option[LearningWord] = { 
+ def getLearning(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Option[LearningWord] = { 
     var ok = true
    
     val targetLanguageId: Long = getLanguage(targetLanguage) match { 
@@ -222,55 +212,57 @@ class SquerylDAO extends DAO {
     }
   }
 
-  def learningFail(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean = transaction { 
+  def learningFail(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean = 
     getLearning(userId, name, sourceLanguage, targetLanguage) match { 
       case None => false
       case Some(lw) => { 
         lw.fails += 1
 	lw.average = lw.success.toFloat / (lw.success + lw.fails)
-	DB.learningWords.update(lw)
+	transaction { DB.learningWords.update(lw) }
 	true
       }
     }
-  }
   
-  def learningSuccess(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean = transaction {
+  
+  def learningSuccess(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean = 
     getLearning(userId, name, sourceLanguage, targetLanguage) match { 
       case None => false
       case Some(lw) => {
 	lw.success += 1
 	lw.average = lw.success.toFloat / (lw.success + lw.fails)
-	DB.learningWords.update(lw)
+	transaction { DB.learningWords.update(lw) }
 	true
       }
     }
-  }
+  
 
 
-  private def existTranslation(table: Table[Translation], sourceWordId: Long, targetWordId: Long): Option[Translation] = from(table)(
-    tr => 
-      where((tr.sourceWordId === sourceWordId) and (tr.targetWordId === targetWordId)) select(tr)).headOption
+  private def existTranslation(table: Table[Translation], sourceWordId: Long, targetWordId: Long): Option[Translation] = 
+    inTransaction { from(table)(tr => 
+      where((tr.sourceWordId === sourceWordId) and (tr.targetWordId === targetWordId)) select(tr)).headOption }
 
   private def wordIncreaseRelations(wordId: Long, lang: String) { 
-    val w = from(DB.words(lang))(w => where(w.id === wordId) select(w)).head
-    w.nbRelations += 1
-    DB.words(lang).update(w)
+    inTransaction { 
+      val w = from(DB.words(lang))(w => where(w.id === wordId) select(w)).head
+      w.nbRelations += 1
+      DB.words(lang).update(w)
+    }
   }
 
   private def translationIncreaseRelations(wordId: Long, sourceLang: String, targetLang: String) { 
-    val tr = DB.translations.get(sourceLang) match { 
-      case None => from(DB.translations(targetLang)(sourceLang))(
-	tr => where(tr.targetWordId === wordId) select(tr)).head
-	  case Some(res) => from(res(targetLang))(
-	  tr =>
-	    where(tr.sourceWordId === wordId) select(tr)).head
+    inTransaction { 
+      val tr = DB.translations.get(sourceLang) match { 
+	case None => from(DB.translations(targetLang)(sourceLang))(
+	  tr => where(tr.targetWordId === wordId) select(tr)).head
+	case Some(res) => from(res(targetLang))(
+	  tr =>  where(tr.sourceWordId === wordId) select(tr)).head
+      }
+      tr.nbRelations += 1
+      getTrTable(sourceLang, targetLang).update(tr)
     }
-    tr.nbRelations += 1
-    
-   getTrTable(sourceLang, targetLang).update(tr)
   }
 
-  //translation
+ //translation
   def addTranslation(sourceWordName: String, sourceLanguage: String, targetWordName: String, targetLanguage: String): Boolean = { 
     val sourceWordId = getWord(sourceWordName, sourceLanguage) match {
       case None => { 
@@ -288,21 +280,21 @@ class SquerylDAO extends DAO {
       case Some(res) => res.id
     }
 
-    transaction { 
+     
       DB.translations.get(sourceLanguage) match { 
 	case None => 
 	  if (existTranslation(DB.translations(targetLanguage)(sourceLanguage), targetWordId, sourceWordId).isEmpty)
-	    DB.translations(targetLanguage)(sourceLanguage).insert(
-	      new Translation(targetWordId, sourceWordId))
+	    transaction { DB.translations(targetLanguage)(sourceLanguage).insert(
+	      new Translation(targetWordId, sourceWordId)) }
 	case Some(res) => 
 	  if (existTranslation(res(targetLanguage), sourceWordId, targetWordId).isEmpty)
-	    res(targetLanguage).insert(
-	      new Translation(sourceWordId, targetWordId))
+	    transaction { res(targetLanguage).insert(
+	      new Translation(sourceWordId, targetWordId)) }
       }
 
-      wordIncreaseRelations(sourceWordId, sourceLanguage)
-      wordIncreaseRelations(targetWordId, targetLanguage)
-    }
+    wordIncreaseRelations(sourceWordId, sourceLanguage)
+    wordIncreaseRelations(targetWordId, targetLanguage)
+    
     true
   }
 
@@ -320,63 +312,65 @@ class SquerylDAO extends DAO {
     }
    
 
-    if (ok) { 
-      transaction { 
+    if (ok)
 	DB.translations.get(sourceLanguage) match { 
-	  case None => from(DB.translations(targetLanguage)(sourceLanguage))(
-	    tr =>
-	      where((tr.sourceWordId === targetWordId) and
-		    (tr.targetWordId === sourceWordId)) select(tr.id)
-	  ).isEmpty.unary_!
-	  case Some(res) => from(res(targetLanguage))(
-	  tr =>
-	    where((tr.sourceWordId === sourceWordId) and
-		  (tr.targetWordId === targetWordId)) select(tr.id)
-	  ).isEmpty.unary_!
+	  case None => transaction { 
+	    from(DB.translations(targetLanguage)(sourceLanguage))(
+	      tr =>
+		where((tr.sourceWordId === targetWordId) and
+		      (tr.targetWordId === sourceWordId)) select(tr.id)
+	    ).isEmpty.unary_! }
+	  case Some(res) => transaction { 
+	    from(res(targetLanguage))(
+	      tr =>
+		where((tr.sourceWordId === sourceWordId) and
+		      (tr.targetWordId === targetWordId)) select(tr.id)
+	    ).isEmpty.unary_! }
 	}
-      }
-    }
     else
       false
   }
-
+  
+  /** Get all possible word that are transation of the given word id.
+   */ 
   private def allWordTranslation(wordId: Long, sourceLanguage: String, targetLanguage: String): List[Word] =
     DB.translations.get(sourceLanguage) match { 
-      case None => 
+      case None => inTransaction { 
 	from(
 	  DB.translations(targetLanguage)(sourceLanguage),
 	  DB.words(targetLanguage))(
 	    (tr, w) => where(
 	      (tr.targetWordId === wordId) and 
-	      (tr.sourceWordId === w.id)) select(w)).toList
-      case Some(res) => 
+	      (tr.sourceWordId === w.id)) select(w)).toList }
+      case Some(res) => inTransaction { 
 	from(
 	  DB.translations(sourceLanguage)(targetLanguage),
 	  DB.words(targetLanguage))(
 	    (tr, w) => where(
 	      (tr.sourceWordId === wordId) and 
-	      (tr.targetWordId === w.id)) select(w)).toList
+	      (tr.targetWordId === w.id)) select(w)).toList }
     }
   
-
+  /** Get all possible translation for a word.
+   */ 
   def allWordTranslation(wordName: String, sourceLanguage: String, targetLanguage: String): List[Translation] = { 
     val w = getWord(wordName, sourceLanguage)
-    if (w.isEmpty) List()
-    else {
-      transaction { 
-	DB.translations.get(sourceLanguage) match { 
-	  case None => 
-	    from(DB.translations(targetLanguage)(sourceLanguage))(
-	      tr => where(tr.targetWordId === w.get.id) select(tr)).toList
-	  case Some(res) => 
+    if (w.isEmpty) 
+      List()
+    else 
+      DB.translations.get(sourceLanguage) match { 
+	case None => transaction { 
+	  from(DB.translations(targetLanguage)(sourceLanguage))(
+	    tr => where(tr.targetWordId === w.get.id) select(tr)).toList }
+	  case Some(res) => transaction { 
 	    from(DB.translations(sourceLanguage)(targetLanguage))(
-	      tr => where(tr.sourceWordId === w.get.id) select(tr)).toList
-	}
+	      tr => where(tr.sourceWordId === w.get.id) select(tr)).toList }
       }
-    }
   }
+  
 
-//  private lazy val enabledTranslation = { 
+  /** Generate all possible couple of translation.
+   */ 
   private def enabledTranslation = {
     val l = ListBuffer[(String, String)]()
     DB.translations.keys.foreach(
@@ -387,7 +381,6 @@ class SquerylDAO extends DAO {
 	))
     l.toList
   }
-
   def allEnableTranslation = enabledTranslation
   
   def existTranslation(tr: (String, String)): Boolean = 
@@ -418,13 +411,13 @@ class SquerylDAO extends DAO {
 
   private def getWordName(transId: Long, sourceLanguage: String, targetLanguage: String) = 
     DB.translations.get(sourceLanguage) match { 
-      case None => { 
+      case None => inTransaction { 
 	val trans = from(DB.translations(targetLanguage)(sourceLanguage))(
 	  tr => where(tr.id === transId) select(tr)).head
 	from(DB.words(sourceLanguage))(
 	  w => where(w.id === trans.targetWordId) select(w.name)).head
       }
-      case Some(res) => { 
+      case Some(res) => inTransaction { 
 	val trans = from(res(targetLanguage))(
 	  tr => where(tr.id === transId) select(tr)).head
 	from(DB.words(sourceLanguage))(
@@ -433,10 +426,10 @@ class SquerylDAO extends DAO {
     }
 
 
-  private def allTranslationScores(learningWordId: Long) = 
-    from(DB.translationScores)(ts => where(ts.learningWordId === learningWordId) select(ts)).toList
+  private def allTranslationScores(learningWordId: Long) = inTransaction { 
+    from(DB.translationScores)(ts => where(ts.learningWordId === learningWordId) select(ts)).toList }
 
-  def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean = transaction { 
+  def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean =  
     getLearning(userId, w, sourceLanguage, targetLanguage) match { 
       case None => false
       case Some(lw) => { 
@@ -449,47 +442,59 @@ class SquerylDAO extends DAO {
 	    if (!tr.isEmpty) { 
 	      val ttr = tr.get
 	      ttr.success += 1
-	      DB.translationScores.update(ttr)
+	      transaction { DB.translationScores.update(ttr) }
 	    }
 	  }
 	}
 	lw.average = lw.success.toFloat / (lw.success + lw.fails)
-	DB.learningWords.update(lw)
+	transaction { DB.learningWords.update(lw) }
 	true
       }
-	}
-  }
+    }
+  
 
-  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float = transaction { 
+  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float =  
     getLearning(userId, w, sourceLanguage, targetLanguage) match { 
       case None => 0.0F
       case Some(lw) => lw.average
     }
-  }
+  
 
 
-  def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean = transaction { 
+  def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean = { 
     try { 
       val srcWordId = getWord(sourceWord, sourceLang).get.id
-      val trgWordId = getWord(targetWord, targetLang).get.id
+      val trgWord = getWord(targetWord, targetLang).get
+      val trgWordId = trgWord.id
       
-      val trans = DB.translations.get(sourceLang) match { 
-	case None => 
-	  from(DB.translations(targetLang)(sourceLang))(
-	    tr => where(
-	      (tr.targetWordId === srcWordId) and 
-	      (tr.sourceWordId === trgWordId)) select(tr)).head
-	case Some(res) => 
-	  from(res(targetLang))(
-	    tr => where(
-	      (tr.sourceWordId === srcWordId) and 
-	      (tr.targetWordId === trgWordId)) select(tr)).head
-      }
+      transaction { 
+	val trans = DB.translations.get(sourceLang) match { 
+	  case None => 
+	    from(DB.translations(targetLang)(sourceLang))( 
+	      tr => where(
+		(tr.targetWordId === srcWordId) and 
+		(tr.sourceWordId === trgWordId)) select(tr)).head 
+	  case Some(res) => 
+	    from(res(targetLang))(
+	      tr => where(
+		(tr.sourceWordId === srcWordId) and 
+		(tr.targetWordId === trgWordId)) select(tr)).head 
+	}
 
-      trans.weakNess += 1
-      DB.translations.get(sourceLang) match { 
-	case None => DB.translations(targetLang)(sourceLang).update(trans)
-	case Some(table) => table(targetLang).update(trans)
+	if (trans.weakNess >= defaultWeaknessLimit && allWordTranslation(srcWordId, sourceLang, targetLang).size > 1)
+	  DB.translations.get(sourceLang) match { 
+	    case None => DB.translations(targetLang)(sourceLang).deleteWhere(tr => tr.id === trans.id)
+	    case Some(table) => table(targetLang).deleteWhere(tr => tr.id === trans.id)
+	    if (trgWord.nbRelations < 2)
+	      DB.words(targetLang).deleteWhere(w => trgWordId === w.id)
+	  }
+	else { 
+	  trans.weakNess += 1
+	  DB.translations.get(sourceLang) match { 
+	    case None => DB.translations(targetLang)(sourceLang).update(trans)
+	    case Some(table) => table(targetLang).update(trans) 
+	  }
+	}
       }
       true
     }

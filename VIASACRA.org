@@ -13,28 +13,30 @@
 * DONE pour l'insersion de mot traduction:
 ** DONE avoir le mot source unique et le mot destination non unique (textarea)
 ** DONE ajouter une traduction automatiquement même si les mots n'existe pas
-* TODO verifier dans UserName que le case ne se perd pas
+* DONE verifier dans UserName que le case ne se perd pas
 ** mais qu'ai-je voulu dire
+* DONE lors de l'insertion dans mot pour add learning verifier que celui ci a au moins 1 traduction
+* DONE permettre a ajouter traduction de pouvoir prendre plusieurs trad en use page
+* DONE changer la selection des langues par 2 select plutot que des radio boutton
+* DONE ajouter des nombre au translation, word pour savoir si une des ligne de la table est utilisé ou non
+* DONE semblerai qu'il y est un probleme apres avoir ajouter une langue puis y ajouter une traduction
 * TODO dans le typesafe language il y a un couplage avec la bl
 ** typesafe doit etre dans le package bl, car il est normal que les regles soit du niveau de la bl
-* TODO lors de l'insertion dans mot pour add learning verifier que celui ci a au moins 1 traduction
 * il faut modifier les fonction de dao pour quelles retourne une indication sur les erreur
   ou sinon quelles renvoi des exception
 ** a voir
 * l'ajout de la langue par un utilisateur est, bof, ca rement en question le raw code sql pour la creation de nouvelles tables
 * TODO faire une distinction plus fine sur la reponse au quizz
 ** on doit pouvoir distinquer quelle est la traduction qui a ete utilise
-* TODO permettre a ajouter traduction de pouvoir prendre plusieurs trad en use page
-* TODO changer la selection des langues par 2 select plutot que des radio boutton
 * TODO supprimer les mots de passe en dur
-* DONE ajouter des nombre au translation, word pour savoir si une des ligne de la table est utilisé ou non
 * TODO faire une table archive (pour eviter de supprimer definitivement) qui stock une version simplifier des learningword
 * TODO fair un rendu pour avoir la liste des mots que l'on apprend par langue
-* TODO semblerai qu'il y est un probleme apres avoir ajouter une langue puis y ajouter une traduction
 * TODO continuer la modification dans le quizz
 * TODO mettre des commentaires
 * TODO si il n'y a pas de BD add_translation plante, si pas de languages dans la BD add_learning plante
 * TODO la generation "aleatoire" du quizz est bancale
+* TODO dans le typesafe Word supprimer tout les espace/tabulation en 1 seule espace 
+** prermetra d'éviter d'avoir des mot double dans la BD qui différe du nombre d'espaces
 * SQL
   - SELECT * 
 FROM english_french_trans eft, french_words fw, english_words ew 

@@ -22,46 +22,63 @@ abstract class DAO {
   //update
 
   //----USER----
-//  def existUser(name: String): Option[User];
   def existUser(name: String): Boolean;
   def addUser(name: String, password: String, email: String): Boolean;
   def verifyUser(name: String, pass: String): Option[User];
   //remove
   //update
 
+
+
   //----LEARNING----
   def addLearningWord(wordName: String, userId: Long, sourceLanguage: String, targetLanguage: String): Boolean;
 
+  /** Return the number of learning word a user have.
+   */ 
+  def numberLearningWords(userId: Long, trans: (String, String)): Long;
 
-//  def allUserLearningWords(userId: Long); //what is it for?
+  /** Given an answer or not, update the learning word score.
+   */ 
+  def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean;
 
-  def allUserLearningWord(userId: Long); //what is it for?
+  /** Return the score of a given learning word.
+   */ 
+  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float;
 
-  def learningWord(userId: Long, limit: Int, sourceLanguage: String, targetLanguage: String): Iterable[(Word, List[Word])]; //wrong name?
+  def getLearning(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Option[LearningWord];
+
+  //wrong name?
+  def learningWord(userId: Long, limit: Int, sourceLanguage: String, targetLanguage: String): Iterable[(Word, List[Word])]; 
   def learningFail(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean;
   def learningSuccess(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean;
   //remove
-  //there will never be update enable
+
+
 
   //----TRANSLATION----
 
-  //add a translation and words if they don't exist
+  /** Add a translation and the given words if they don't exist
+   *  already.
+   */ 
   def addTranslation(sourceWordName: String, sourceLanguage: String, targetWordName: String, targetLanguage: String): Boolean;
-//  def allWordTranslations(wordName: String, sourceLanguage: String, targetLanguage: String): List[Translation];
+
+  /** Return all translation availables for a word from a language
+   *  into another language.
+   */ 
   def allWordTranslation(wordName: String, sourceLanguage: String, targetLanguage: String): List[Translation];
 
-  //need explanation
+  /** Return all translation keeping the order they have.
+   */ 
   def allEnableTranslation: List[(String, String)];
   def existTranslation(tr: (String, String)): Boolean;
   def allEnableTranslation(userId: Long): List[(String, String)];
 
-  def numberLearningWords(userId: Long, trans: (String, String)): Long;
 
-  def updateLearningWord(userId: Long, answer: Option[String], w: String, sourceLanguage: String, targetLanguage: String): Boolean;
-
+  /** Test if a word in a given language have a translation into
+   *  another word in a specified language.
+   */ 
   def existTranslation(sourceWordName: String, sourceLanguage: String, targetWordName: String, targetLanguage: String): Boolean;
 
   def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean;
 
-  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float;
 }
