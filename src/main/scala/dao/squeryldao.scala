@@ -185,6 +185,60 @@ class SquerylDAO extends DAO {
     }
   }
 
+  def removeLearningWord(userId: Long, name: String, srcLang: String, trgLang: String): Boolean = transaction { 
+   val srcLangId: Long = from(DB.languages)(
+      l => where(l.name === srcLang) select(l.id)).head
+    val trgLangId: Long = from(DB.languages)(
+      l => where(l.name === trgLang) select(l.id)).head
+    val wordId = from(DB.words(srcLang))(w => where(w.name === name) select(w.id)).head
+
+    DB.learningWords.deleteWhere(lw => (lw.wordId === wordId) and (lw.sourceLanguageId === srcLangId) and (lw.targetLanguageId === trgLangId))
+
+  true
+  }
+
+
+  private def languageIds: HashMap[Long, String] = transaction {
+    from(DB.languages)(l => select(l)).foldLeft(HashMap.newBuilder[Long, String])(
+      (m, e) => m += (e.id -> e.name)).result
+  }
+
+
+  def LearningWord(userId: Long): scala.collection.mutable.HashMap[String, ListBuffer[(String, List[String])]] = {
+    import scala.collection.mutable.HashMap 
+    val langs = languageIds
+    val m = HashMap[String, ListBuffer[(String, List[String])]]()
+    transaction { 
+      val q = from(DB.learningWords)(lw => where(lw.userId === userId) select(lw))
+      q.foreach(
+	e => { 
+	  val trgLang = langs(e.targetLanguageId)
+	  val srcLang = langs(e.sourceLanguageId)
+	  val wordName = from(DB.words(srcLang))(l => where(l.id === e.wordId) select(l.name)).head
+	  
+	  val allTrans = DB.translations.get(srcLang) match { 
+	    case None => from(DB.translations(trgLang)(srcLang), DB.words(trgLang))(
+	      (tr, w) => where((tr.targetWordId === e.wordId) and
+			  (w.id === tr.sourceWordId)) select(w.name))
+
+	    case Some(res) => from(res(trgLang), DB.words(trgLang))(
+	      (tr, w) => where((tr.sourceWordId === e.wordId) and
+			  (w.id === tr.targetWordId)) select(w.name))
+	  }
+	  val key = srcLang + "-" + trgLang
+	  val res = wordName -> allTrans.toList
+
+	  if (!m.contains(key))
+	    m.update(key, ListBuffer(res))
+	  else 
+	    m(key) += (res)
+	}
+      )
+    }
+    m
+  }
+    
+
  def getLearning(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Option[LearningWord] = { 
     var ok = true
    

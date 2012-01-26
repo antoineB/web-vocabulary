@@ -288,6 +288,13 @@ object ConcreteBL extends BL with SessionVarStorage {
       dao.increaseFailTranslation(checkedSource, checkedTranslation._1, checkedTarget, checkedTranslation._2)
   }
 
+  def listLearningWords(userId: Long) = { 
+    dao.LearningWord(userId)
+  }
+
+  def removeLearningWord(userId: Long, name: String, srcLang: String, trgLang: String) { 
+    dao.removeLearningWord(userId, name, srcLang, trgLang)
+  }
 }
 
 

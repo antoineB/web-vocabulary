@@ -1,5 +1,7 @@
 package dao
 
+import scala.collection.mutable.ListBuffer
+
 import dao.entity._
 
 abstract class DAO { 
@@ -49,9 +51,12 @@ abstract class DAO {
 
   //wrong name?
   def learningWord(userId: Long, limit: Int, sourceLanguage: String, targetLanguage: String): Iterable[(Word, List[Word])]; 
+
+  def LearningWord(userId: Long): scala.collection.mutable.HashMap[String, ListBuffer[(String, List[String])]];
   def learningFail(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean;
   def learningSuccess(userId: Long, name: String, sourceLanguage: String, targetLanguage: String): Boolean;
-  //remove
+  def removeLearningWord(userId: Long, name: String, srcLang: String, trgLang: String): Boolean;
+
 
 
 
