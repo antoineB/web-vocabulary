@@ -39,13 +39,14 @@ object DB extends Schema {
     l.id is(autoIncremented, primaryKey),
     l.average defaultsTo(0.0F),
     l.success defaultsTo(0),
-    l.fails defaultsTo(0)
+    l.fails defaultsTo(0),
+    columns(l.wordId, l.targetLanguageId, l.sourceLanguageId) are(unique)
   ))
 
   on(translationScores)(ts => declare(
     ts.id is(autoIncremented, primaryKey),
     ts.learningWordId is(indexed),
-    columns(ts.learningWordId, ts.translationId) are(indexed),
+    columns(ts.learningWordId, ts.translationId) are(unique),
     ts.success defaultsTo(0)
   ))
 
@@ -90,6 +91,7 @@ object DB extends Schema {
       "CREATE TABLE " + name + " (id BIGINT PRIMARY KEY AUTO_INCREMENT, sourceWordId BIGINT NOT NULL, targetWordId BIGINT NOT NULL, nbRelations INT DEFAULT 0, weakNess INT DEFAULT 0);")
     s.executeUpdate("CREATE INDEX " + name + "_si on " + name + "(sourceWordId);")
     s.executeUpdate("CREATE INDEX " + name + "_ti on " + name + "(targetWordId);")
+    s.executeUpdate("CREATE UNIQUE INDEX " + name + "_ui on " + name + "(sourceWordId, targetWordId);")
   
   } }
 
