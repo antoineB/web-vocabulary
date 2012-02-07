@@ -38,7 +38,6 @@ class AddTranslation extends LanguageSelect {
     "#target-language" #> select2NodeSeq &
     "name=word-from" #> SHtml.onSubmit(sourceWord.value = _) &
     "name=word-to" #> SHtml.onSubmit(targetWord.value = _) &
-//    "name=language" #> SHtml.radio(translations, Full(translations.head), translation.value = _).toForm &
     "type=submit" #> SHtml.onSubmitUnit(process)
   }
 }

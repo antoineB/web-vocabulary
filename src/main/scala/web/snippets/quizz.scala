@@ -92,8 +92,6 @@ class Quizz {
     val numbers = List(("5", "5"), ("10", "10"), ("15", "15"), ("20", "20"))
     val translations = ConcreteBL.allEnableTranslations(UserSession.is.get)
 
-    println("render")
-
     val tr = translations.map(e => (e._1 + "-" + e._2) -> (e._1 + "-" + e._2))
 
     currentTrans = tr.head._1

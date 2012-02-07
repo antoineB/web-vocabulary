@@ -30,15 +30,15 @@
 ** a voir
 * l'ajout de la langue par un utilisateur est, bof, ca rement en question le raw code sql pour la creation de nouvelles tables
 * TODO supprimer les mots de passe en dur
-* TODO faire une table archive (pour eviter de supprimer definitivement) qui stock une version simplifier des learningword
+* DONE faire une table archive (pour eviter de supprimer definitivement) qui stock une version simplifier des learningword
 * TODO continuer la modification dans le quizz
 * TODO mettre des commentaires
 * TODO si il n'y a pas de BD add_translation plante, si pas de languages dans la BD add_learning plante
 * TODO la generation "aleatoire" du quizz est bancale
 * TODO dans le typesafe Word supprimer tout les espace/tabulation en 1 seule espace 
 ** prermetra d'éviter d'avoir des mot double dans la BD qui différe du nombre d'espaces
-* TODO fair que le quizz ait une limite sur les mots
 * TODO quizz plante si pas de mots dans learning words
+* TODO utiliser le code iso des language pour éviter les doublons
 * SQL
   - SELECT * 
 FROM english_french_trans eft, french_words fw, english_words ew 

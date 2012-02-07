@@ -72,7 +72,7 @@ class ListWord(valueIn: String) {
 
   def regex = """.{1,50}""".r
 
-  def beforeCheck(s: String) = s.split("\r\n").filter(_ != "").map(_.trim.toLowerCase)
+  def beforeCheck(s: String) = s.split("\r\n").filter(_.trim != "").map(_.trim.toLowerCase)
 
   def afterCheck(a: Array[String]) = a.toList
 

@@ -157,7 +157,7 @@ class SquerylDAO extends DAO {
 	tr => where(tr.sourceWordId === wordId) select(tr)).toList }
     }
     
-  def learningWord(userId: Long, limit: Int, sourceLanguage: String, targetLanguage: String): Iterable[(Word, List[Word])] = { 
+  def learningWord(userId: Long, sourceLanguage: String, targetLanguage: String): Iterable[(Word, List[Word])] = { 
     var ok = true
    
     val targetLanguageId: Long = getLanguage(targetLanguage) match { 
@@ -179,7 +179,7 @@ class SquerylDAO extends DAO {
 	    (lw.targetLanguageId === targetLanguageId) and 
 	    (lw.sourceLanguageId === sourceLanguageId) and
 	    (sw.id === lw.wordId)
-	  ) select(sw) orderBy(lw.average asc)).page(0, limit)
+	  ) select(sw) orderBy(lw.average asc))
 
       q.map(w => ((w, allWordTranslation(w.id, sourceLanguage, targetLanguage))))
     }
@@ -507,12 +507,16 @@ class SquerylDAO extends DAO {
     }
   
 
-  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): Float =  
+  def getLearningWordScore(userId: Long, w: String, sourceLanguage: String, targetLanguage: String): (Int, Float) =  
     getLearning(userId, w, sourceLanguage, targetLanguage) match { 
-      case None => 0.0F
-      case Some(lw) => lw.average
+      case None => (0 -> 0.0F)
+      case Some(lw) => (lw.fails + lw.success -> lw.average)
     }
-  
+
+  def archiveLearningWord(userId: Long, w: String, sourceLanguage: String, targetLanguage: String) {
+    transaction { DB.archives.insert(new Archive(userId, w, sourceLanguage, targetLanguage)) }
+    removeLearningWord(userId, w, sourceLanguage, targetLanguage)
+  }
 
 
   def increaseFailTranslation(sourceWord: String, sourceLang: String, targetWord: String, targetLang: String): Boolean = { 

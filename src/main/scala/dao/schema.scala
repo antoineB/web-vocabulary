@@ -12,13 +12,13 @@ import java.sql.{Connection, Statement, ResultSet}
 object DB extends Schema {
   val words = scala.collection.mutable.HashMap[String, Table[Word]]()
   val translations = scala.collection.mutable.HashMap[String, HashMap[String, Table[Translation]]]()
-
+  
   val languages = table[Language]("languages")
   val translationTables = table[TranslationTable]("translation_tables")
   val users = table[User]("users")
   val learningWords = table[LearningWord]("learning_words")
   val translationScores = table[TranslationScore]("translation_scores")
-
+  val archives = table[Archive]("archive")
 
   on(languages)(l => declare(
     l.name is(unique),
@@ -131,7 +131,7 @@ object Main {
   def startDbSession():Unit = {
     val dbUsername = "test"
     val dbPassword = "test"
-    val dbConnection = "jdbc:mysql://localhost:3306/language_bis?useUnicode=true&characterEncoding=utf8"
+    val dbConnection = "jdbc:mysql://localhost:3306/language?useUnicode=true&characterEncoding=utf8"
 
     Class.forName("com.mysql.jdbc.Driver")
     SessionFactory.concreteFactory = Some(
@@ -150,22 +150,5 @@ object Main {
     DB.addNewLanguage("finish", "fi")
     DB.addNewLanguage("french", "fr")
     DB.addNewLanguage("english", "en")
-
-
-/*    DB.init
-
-    dd.addUser("toto", "bernard", "jean")
-    */
-
-   /* inTransaction { 
-      Session.currentSession.setLogger(msg => println(msg)) 
-      val a = Schema.users.insert(new User("浩aaaaaa", "pass", "toto@mail.org"))
-      /*
-      val q = from(Schema.users)(s => select(s))
-      q.foreach(
-      e =>
-	println(e.name)
-      )*/
-    }*/
   }
 }

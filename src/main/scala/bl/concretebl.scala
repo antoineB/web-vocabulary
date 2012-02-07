@@ -194,7 +194,7 @@ object ConcreteBL extends BL with SessionVarStorage {
 
     //si la translation change
 
-    val lw = dao.learningWord(userId, 30, checkedTranslation._1, checkedTranslation._2).toList
+    val lw = dao.learningWord(userId, checkedTranslation._1, checkedTranslation._2).toList
 
     val mapB = HashMap.newBuilder[String, List[String]]
     for ((a, b) <- lw)
@@ -250,7 +250,11 @@ object ConcreteBL extends BL with SessionVarStorage {
 
 	  dao.updateLearningWord(userId, {if (r._1) Some(res.trim.toLowerCase) else None}, w, trans.get.get._1, trans.get.get._2)
 	  
-	  val score = dao.getLearningWordScore(userId, w, trans.get.get._1, trans.get.get._2)
+	  val scores = dao.getLearningWordScore(userId, w, trans.get.get._1, trans.get.get._2)
+	  val score = scores._2
+
+	  if (scores._1 > 49 && score > 0.74)
+	    dao.archiveLearningWord(userId, w, trans.get.get._1, trans.get.get._2)
 
 	  mapB += (k -> (r._1 -> r._2 -> score))
 	}

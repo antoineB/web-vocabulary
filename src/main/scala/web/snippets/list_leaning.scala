@@ -25,7 +25,7 @@ class ListLearning {
   def buttonAjax(s: String, lang: String)(): JsCmd = { 
     val split = lang.split("-")
     ConcreteBL.removeLearningWord(UserSession.is.get, s, split(0), split(1))
-    JsRaw("var l = $(\".source-word\"); for (var i = 0; l.size(); i++) { if ($(l[i]).text() === \"" + s + "\") { $(l[i]).parent().remove(); break; } }").cmd
+    JsRaw("var l = $(\".source-word\"); for (var i = 0; l.size(); i++) { if ($(l[i]).text() === \"%s\") { $(l[i]).parent().remove(); break; } }".format(s)).cmd
   }
 
  
@@ -35,7 +35,7 @@ class ListLearning {
     map.foreach(
       e =>  
 	ns ++= <div> { 
-	  e._2.foldLeft(<div class="title-language">{e._1}</div>:NodeSeq)(
+	  e._2.foldLeft(<h3 class="title-language">{e._1}</h3>:NodeSeq)(
 	    (res, t) => res ++ <div>{t._2.foldLeft(SHtml.ajaxButton(<b>remove</b>, buttonAjax(t._1, e._1) _) ++ <span class="source-word">{t._1}</span>: NodeSeq)((l, w) => l ++ <span class="target-word">{w}</span>)}</div>
 	  )
 	} </div>
